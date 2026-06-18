@@ -1,0 +1,61 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql_database
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  backend-js:
+    build:
+      context: ./BackJs_Eval3
+    container_name: backend_js
+    environment:
+      DB_HOST: mysql-db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: users_db
+      PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql-db
+    networks:
+      - app-network
+
+  backend-py:
+    build:
+      context: ./BackPy_Eval3
+    container_name: backend_py
+    environment:
+      DB_HOST: mysql-db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: products_db
+      PORT: 8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql-db
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./Front_Eval3
+    container_name: frontend_web
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
